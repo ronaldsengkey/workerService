@@ -1,20 +1,49 @@
 package main
 
 import (
-	"fmt"
-	"io/ioutil"
 	"log"
-	"net/http"
-	"time"
-	"encoding/json"
-	"github.com/gomodule/redigo/redis"
 	"github.com/robfig/cron"
 	"net"
 	"os"
 	"os/signal"
 	"syscall"
 	"github.com/takama/daemon"
+	billfazz "workerservice/billfazz"
+	balance "workerservice/balance"
 )
+
+func main() {
+	log.Println("Start Golang")
+	c := cron.New()
+	c.AddFunc("10 16 14 * *", func() {
+		if balance.CheckLastDay() {
+			balance.GenerateSaldo()
+		}
+	})
+	c.AddFunc("20 16 14 * *", func() {
+		if balance.CheckLastDay() {
+			balance.SaveSaldo()
+		}
+	})
+	c.AddFunc("30 24 14 * *", func() {
+		billfazz.BillfazzCronjob()
+	})
+	log.Println("Start cron")
+	c.Start()
+	srv, err := daemon.New(name, description, dependencies...)
+	if err != nil {
+		errlog.Println("Error: ", err)
+		os.Exit(1)
+	}
+	service := &Service{srv}
+	status, err := service.Manage()
+	if err != nil {
+		errlog.Println(status, "\nError: ", err)
+		os.Exit(1)
+	}
+	log.Println(status)
+}
+
 
 const (
 	// name of the service
@@ -122,221 +151,4 @@ func handleClient(client net.Conn) {
 func init() {
 	stdlog = log.New(os.Stdout, "", log.Ldate|log.Ltime)
 	errlog = log.New(os.Stderr, "", log.Ldate|log.Ltime)
-}
-
-func main() {
-	fmt.Printf("Start Golang\n")
-	c := cron.New()
-	c.AddFunc("23 10 * * *", func() { 
-		// log.Println("Start Generate Saldo")
-		if checkLastDay() {
-			generateSaldo()
-		} 
-	})
-	c.AddFunc("24 10 * * *", func() { 
-		// log.Println("Start save Saldo")
-		saveSaldo()
-	})
-	log.Println("Start cron")
-	c.Start()
-	srv, err := daemon.New(name, description, dependencies...)
-	if err != nil {
-		errlog.Println("Error: ", err)
-		os.Exit(1)
-	}
-	service := &Service{srv}
-	status, err := service.Manage()
-	if err != nil {
-		errlog.Println(status, "\nError: ", err)
-		os.Exit(1)
-	}
-	fmt.Println(status)
-}
-
-type Customer struct {
-	Id string `json:"id"`
-	Nominal string `json:"nominal"`
-	Periode string `json:"periode"`
-}
-
-type Response struct {
-	ResponseCode string `json:"responseCode"`
-	ResponseMessage string `json:"responseMessage"`
-	Data []Customer
-}
-
-func getCustomer() Response{
-	url := "http://localhost:8089/wallet/cronjob/getCustomer"
-	timeout := time.Duration(5 * time.Second)
-	client := http.Client{
-		Timeout: timeout,
-	}
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		log.Println(err)
-	}
-	req.Header.Add("clientKey", "clientKey")
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Println(err)
-	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Println(err)
-	}
-	var res Response
-	json.Unmarshal(body, &res)
-	// log.Println(res.ResponseMessage)
-	return res
-} 
-
-func getSaldo(id string) Response{
-	url := "http://localhost:8089/wallet/cronjob/getSaldo/" + id
-	timeout := time.Duration(5 * time.Second)
-	client := http.Client{
-		Timeout: timeout,
-	}
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		log.Println(err)
-	}
-	req.Header.Add("clientKey", "clientKey")
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Println(err)
-	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Println(err)
-	}
-	var res Response
-	json.Unmarshal(body, &res)
-	// log.Println(res.ResponseMessage)
-	return res
-}
-
-func generateSaldo() {
-	log.Printf("start generateSaldo")
-	conn, err := redis.Dial("tcp", "localhost:6379")
-	if err != nil {
-		log.Println(err)
-	}
-	defer conn.Close()
-	response := getCustomer()
-	// log.Println(response)
-	if response.ResponseCode == "200" {
-		for _, data := range response.Data {
-			res := getSaldo(data.Id)
-			if res.ResponseCode == "200" {
-				_, err = conn.Do("HMSET", "customerSaldo:" + data.Id, "id", data.Id, "nominal", res.Data[0].Nominal, "periode", res.Data[0].Periode)
-				if err != nil {
-					log.Println(err)
-				}
-				// log.Println("HMSET", "customerSaldo:" + data.Id, "id", data.Id, "nominal", res.Data[0].Nominal, "periode", res.Data[0].Periode)
-			} else {
-				log.Println("error: ", res)
-			}
-		}
-	} else {
-		log.Println("error: ", response)
-	}
-	log.Printf("end generateSaldo")
-}
-
-func saveSaldoToDB(id, nominal, periode string) Response{
-	url := "http://localhost:8089/wallet/cronjob/saveSaldo"
-	timeout := time.Duration(5 * time.Second)
-	client := http.Client{
-		Timeout: timeout,
-	}
-	req, err := http.NewRequest("POST", url, nil)
-	if err != nil {
-		log.Println(err)
-	}
-	req.Header.Add("clientKey", "clientKey")
-	req.Header.Add("id", id)
-	req.Header.Add("nominal", nominal)
-	req.Header.Add("periode", periode)
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Println(err)
-	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Println(err)
-	}
-	var res Response
-	json.Unmarshal(body, &res)
-	// log.Println(res.ResponseMessage)
-	return res
-}
-
-func saveSaldo() {
-	log.Printf("start saveSaldo")
-	conn, err := redis.Dial("tcp", "localhost:6379")
-	if err != nil {
-		log.Println(err)
-	}
-	defer conn.Close()
-	response := getCustomer()
-	if response.ResponseCode == "200" {
-		for _, data := range response.Data {
-			id, err := redis.String(conn.Do("HGET", "customerSaldo:" + data.Id, "id"))
-			if err != nil {
-				log.Println(err)
-				continue
-			}
-			nominal, err := redis.String(conn.Do("HGET", "customerSaldo:" + data.Id, "nominal"))
-			if err != nil {
-				log.Println(err)
-				continue 
-			}
-			periode, err := redis.String(conn.Do("HGET", "customerSaldo:" + data.Id, "periode"))
-			if err != nil {
-				log.Println(err)
-				continue 
-			}
-			// log.Println(id, ": " , nominal, ": ", periode)
-			saveSaldoToDB(id, nominal, periode)
-			// log.Println(res)
-			_, err = conn.Do("DEL", "customerSaldo:" + data.Id)
-			if err != nil {
-				log.Println(err)
-			}
-		}
-	} else {
-		log.Println("error: ", response)
-	}
-	log.Printf("end saveSaldo")
-}
-
-func checkLastDay() bool{
-	currentTime := time.Now().Format("2006-01-02")
-	lastDay := getLastDay().Format("2006-01-02")
-	log.Println("current: ", currentTime)
-	log.Println("lastDay: ", lastDay)
-	if currentTime == lastDay {
-		log.Println("lastDay: true")
-		return true
-	} else {
-		log.Println("lastDay: false")
-		return true
-	}
-}
-
-func getLastDay() time.Time{
-	now := time.Now()
-    currentYear, currentMonth, _ := now.Date()
-    currentLocation := now.Location()
-
-    firstOfMonth := time.Date(currentYear, currentMonth, 1, 0, 0, 0, 0, currentLocation)
-    lastOfMonth := firstOfMonth.AddDate(0, 1, -1)
-
-    // fmt.Println(firstOfMonth)
-	// fmt.Println(lastOfMonth)
-	
-	return lastOfMonth
 }
