@@ -10,23 +10,31 @@ import (
 	"github.com/takama/daemon"
 	billfazz "workerservice/billfazz"
 	balance "workerservice/balance"
+	promotion "workerservice/promotion"
+	transaction "workerservice/transaction"
 )
 
 func main() {
 	log.Println("Start Golang")
 	c := cron.New()
-	c.AddFunc("10 16 14 * *", func() {
+	c.AddFunc("10 0 12 * *", func() {
 		if balance.CheckLastDay() {
 			balance.GenerateSaldo()
 		}
 	})
-	c.AddFunc("20 16 14 * *", func() {
+	c.AddFunc("15 0 12 * *", func() {
 		if balance.CheckLastDay() {
 			balance.SaveSaldo()
 		}
 	})
-	c.AddFunc("30 24 14 * *", func() {
+	c.AddFunc("20 0 12 * *", func() {
 		billfazz.BillfazzCronjob()
+	})
+	c.AddFunc("25 0 12 * *", func() {
+		promotion.GeneratePromotionList()
+	})
+	c.AddFunc("30 0 12 * *", func() {
+		transaction.GenerateInOut()
 	})
 	log.Println("Start cron")
 	c.Start()
