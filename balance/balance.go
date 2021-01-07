@@ -16,6 +16,7 @@ type Response = model.Response
 
 func getCustomer() Response{
 	url := apiurl + "/wallet/cronjob/getCustomer"
+	log.Printf(url)
 	timeout := time.Duration(5 * time.Second)
 	client := http.Client{
 		Timeout: timeout,
@@ -74,10 +75,11 @@ func GenerateSaldo() {
 	}
 	defer conn.Close()
 	response := getCustomer()
-	// log.Println(response)
+	log.Println(response)
 	if response.ResponseCode == "200" {
 		for _, data := range response.Data {
 			res := getSaldo(data.Id)
+			log.Println(res);
 			if res.ResponseCode == "200" {
 				_, err = conn.Do("HMSET", "customerSaldo:" + data.Id, "id", data.Id, "nominal", res.Data[0].Nominal, "periode", res.Data[0].Periode)
 				if err != nil {
@@ -119,7 +121,7 @@ func saveSaldoToDB(id, nominal, periode string) Response{
 	}
 	var res Response
 	json.Unmarshal(body, &res)
-	// log.Println(res.ResponseMessage)
+	log.Println(res.ResponseMessage)
 	return res
 }
 
