@@ -16,24 +16,30 @@ import (
 
 func main() {
 	log.Println("Start Golang")
+	// billfazz.BillfazzCronjob();
 	c := cron.New()
-	c.AddFunc("10 0 12 * *", func() {
+	// c.AddFunc("0 0 23 * *", func() {
+	// 	if balance.CheckLastDay() {
+	// 		balance.GenerateSaldo()
+	// 	}
+	// })
+	// c.AddFunc("10 0 23 * *", func() {
+	// 	if balance.CheckLastDay() {
+	// 		balance.SaveSaldo()
+	// 	}
+	// })
+	c.AddFunc("0 10 0 * *", func() {
 		if balance.CheckLastDay() {
-			balance.GenerateSaldo()
+			balance.GenerateCustomerSaldo()
 		}
 	})
-	c.AddFunc("15 0 12 * *", func() {
-		if balance.CheckLastDay() {
-			balance.SaveSaldo()
-		}
-	})
-	c.AddFunc("20 0 12 * *", func() {
+	c.AddFunc("0 0 11 * *", func() {
 		billfazz.BillfazzCronjob()
 	})
-	c.AddFunc("25 0 12 * *", func() {
+	c.AddFunc("0 0 12 * *", func() {
 		promotion.GeneratePromotionList()
 	})
-	c.AddFunc("30 0 12 * *", func() {
+	c.AddFunc("30 0 23 * *", func() {
 		transaction.GenerateInOut()
 	})
 	log.Println("Start cron")

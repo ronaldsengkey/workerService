@@ -15,6 +15,7 @@ const apiurl = model.ApiUrl
 type Response = model.Response
 
 func getCustomer() Response{
+	log.Printf("start getCustomer")
 	url := apiurl + "/wallet/cronjob/getCustomer"
 	log.Printf(url)
 	timeout := time.Duration(5 * time.Second)
@@ -38,12 +39,14 @@ func getCustomer() Response{
 	var res Response
 	json.Unmarshal(body, &res)
 	// log.Println(res.ResponseMessage)
+	log.Printf("end getCustomer")
 	return res
 } 
 
 func getSaldo(id string) Response{
+	log.Printf("start getSaldo")
 	url := apiurl + "/wallet/cronjob/getSaldo/" + id
-	timeout := time.Duration(5 * time.Second)
+	timeout := time.Duration(60 * time.Second)
 	client := http.Client{
 		Timeout: timeout,
 	}
@@ -64,6 +67,7 @@ func getSaldo(id string) Response{
 	var res Response
 	json.Unmarshal(body, &res)
 	// log.Println(res.ResponseMessage)
+	log.Printf("end getSaldo")
 	return res
 }
 
@@ -96,7 +100,43 @@ func GenerateSaldo() {
 	log.Printf("end generateSaldo")
 }
 
+func GenerateCustomerSaldo() {
+	log.Println("start GenerateCustomerSaldo")
+	res := saveCustomerSaldo()
+	log.Println(res)
+	log.Println("end GenerateCustomerSaldo")
+}
+
+func saveCustomerSaldo() Response{
+	log.Printf("start saveCustomerSaldo")
+	url := apiurl + "/wallet/cronjob/saveCustomerSaldo"
+	timeout := time.Duration(120 * time.Second)
+	client := http.Client{
+		Timeout: timeout,
+	}
+	req, err := http.NewRequest("POST", url, nil)
+	if err != nil {
+		log.Println(err)
+	}
+	req.Header.Add("serviceCode", "eyJjb2RlIjoid29ya2VyU2VydmljZVVsdGlwYXkiLCJjcmVhdGVkX2F0IjoiMTYxMjc1NjY4MTkwOSJ9")
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Println(err)
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Println(err)
+	}
+	var res Response
+	json.Unmarshal(body, &res)
+	log.Println(res.ResponseMessage)
+	log.Printf("end saveCustomerSaldo")
+	return res
+}
+
 func saveSaldoToDB(id, nominal, periode string) Response{
+	log.Printf("start saveSaldoToDB")
 	url := apiurl + "/wallet/cronjob/saveSaldo"
 	timeout := time.Duration(5 * time.Second)
 	client := http.Client{
@@ -122,6 +162,7 @@ func saveSaldoToDB(id, nominal, periode string) Response{
 	var res Response
 	json.Unmarshal(body, &res)
 	log.Println(res.ResponseMessage)
+	log.Printf("end saveSaldoToDB")
 	return res
 }
 
@@ -165,8 +206,9 @@ func SaveSaldo() {
 }
 
 func CheckLastDay() bool{
+	log.Printf("start CheckLastDay")
 	currentTime := time.Now().Format("2006-01-02")
-	lastDay := getLastDay().Format("2006-01-02")
+	lastDay := getFirstDay().Format("2006-01-02")
 	log.Println("current: ", currentTime)
 	log.Println("lastDay: ", lastDay)
 	if currentTime == lastDay {
@@ -178,16 +220,18 @@ func CheckLastDay() bool{
 	}
 }
 
-func getLastDay() time.Time{
+func getFirstDay() time.Time{
+	log.Printf("start getFirstDay")
 	now := time.Now()
     currentYear, currentMonth, _ := now.Date()
     currentLocation := now.Location()
 
     firstOfMonth := time.Date(currentYear, currentMonth, 1, 0, 0, 0, 0, currentLocation)
-    lastOfMonth := firstOfMonth.AddDate(0, 1, -1)
+    // lastOfMonth := firstOfMonth.AddDate(0, 1, -1)
 
     // fmt.Println(firstOfMonth)
 	// fmt.Println(lastOfMonth)
-	
-	return lastOfMonth
+	log.Printf("end getFirstDay")
+	return firstOfMonth
+	// return lastOfMonth
 }

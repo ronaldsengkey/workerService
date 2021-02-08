@@ -24,10 +24,10 @@ type BillfazzProduct = model.BillfazzProduct
 func BillfazzCronjob() {
 	log.Println("start billfazzCronjob")
 	res := getBillfazzProduct()
-	// log.Println(len(res.Data))
+	log.Println(len(res.Data))
 	if len(res.Data) > 0 {
 		resDel := delBillfazzProduct()
-		// log.Println(resDel)
+		log.Println(resDel)
 		if resDel.ResponseCode == "200" {
 			for _, data := range res.Data {
 				saveBillfazzProduct(data)
@@ -42,6 +42,7 @@ func BillfazzCronjob() {
 }
 
 func getBillfazzProduct() BillfazzResponse{
+	log.Println("start getBillfazzProduct");
 	url := BILLFAZZ_URL_SANDBOX + "/products/client"
 	timeout := time.Duration(10 * time.Second)
 	client := http.Client{
@@ -67,10 +68,12 @@ func getBillfazzProduct() BillfazzResponse{
 	if len(res.Data) < 1 {
 		// log.Println(string(body))
 	}
+	log.Println("end getBillfazzProduct");
 	return res
 }
 
 func delBillfazzProduct() Response{
+	log.Println("start delBillfazzProduct");
 	url := apiUrl + "/wallet/cronjob/billfazz"
 	timeout := time.Duration(5 * time.Second)
 	client := http.Client{
@@ -94,10 +97,12 @@ func delBillfazzProduct() Response{
 	var res Response
 	json.Unmarshal(body, &res)
 	// log.Println(res.Data[0].Code)
+	log.Println("end delBillfazzProduct");
 	return res
 }
 
 func saveBillfazzProduct(data BillfazzProduct) Response{
+	log.Println("start saveBillfazzProduct");
 	stringUrl := apiUrl + "/wallet/cronjob/billfazz"
 	timeout := time.Duration(5 * time.Second)
 	client := http.Client{
@@ -133,5 +138,6 @@ func saveBillfazzProduct(data BillfazzProduct) Response{
 	var res Response
 	json.Unmarshal(resBody, &res)
 	// log.Println(res.Data[0].Code)
+	log.Println("end saveBillfazzProduct");
 	return res
 }

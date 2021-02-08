@@ -23,6 +23,7 @@ func GenerateInOut(){
 	log.Printf("start GenerateInOut")
 	response := postData()
 	log.Println(response)
+	log.Printf("end GenerateInOut")
 }
 
 func postData() Response{

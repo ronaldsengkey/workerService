@@ -55,4 +55,9 @@ const (
 	ApiUrl = "https://sandbox.api.ultipay.id:8443"
 	ApiTransactionUrl = "https://sandbox.api.ultipay.id:8443"
 	ApiNotificationUrl = "https://sandbox.api.ultipay.id:8443"
+	// BILLFAZZ_URL_SANDBOX = "https://secure.billfazz.com/sandbox/api/v1"
+	// BILLFAZZ_KEY_SANDBOX = "dXNlcm5hbWU6NGI1NTIyOGRmZGYyOTgyNDBhZDA5MjU4NWMyM2NiZWQ3ZGRjMTgyMjFjMTUxZDUzNDU="
+	// ApiUrl = "http://localhost:8443"
+	// ApiTransactionUrl = "http://localhost:8443"
+	// ApiNotificationUrl = "http://localhost:8443"
 )
