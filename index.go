@@ -15,7 +15,7 @@ import (
 )
 
 func main() {
-	log.Println("Start Golang::")
+	log.Println("Start Golang:::")
 	// billfazz.BillfazzCronjob();
 	c := cron.New()
 	// c.AddFunc("0 0 23 * *", func() {
