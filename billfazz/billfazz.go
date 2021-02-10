@@ -141,3 +141,40 @@ func saveBillfazzProduct(data BillfazzProduct) Response{
 	log.Println("end saveBillfazzProduct");
 	return res
 }
+
+func UpdateBillfazzTransactionCronjob() {
+	log.Println("start UpdateBillfazzTransactionCronjob")
+	res := UpdateBillfazzTransaction()
+	log.Println(res)
+	log.Println("end UpdateBillfazzTransactionCronjob")
+}
+
+func UpdateBillfazzTransaction() Response{
+	log.Println("start UpdateBillfazzTransaction");
+	stringUrl := apiUrl + "/wallet/cronjob/billfazz"
+	timeout := time.Duration(5 * time.Second)
+	client := http.Client{
+		Timeout: timeout,
+	}
+	req, err := http.NewRequest("PUT", stringUrl, nil)
+	if err != nil {
+		log.Println(err)
+	}
+	req.Header.Add("workerService", "workerService")
+	req.Header.Add("Content-Type", "application/json")
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Println(err)
+	}
+	defer resp.Body.Close()
+	resBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Println(err)
+	}
+	// log.Println(string(body))
+	var res Response
+	json.Unmarshal(resBody, &res)
+	// log.Println(res.Data[0].Code)
+	log.Println("end UpdateBillfazzTransaction");
+	return res
+}

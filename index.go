@@ -42,6 +42,9 @@ func main() {
 	c.AddFunc("30 0 23 * *", func() {
 		transaction.GenerateInOut()
 	})
+	c.AddFunc("0 */3 * * *", func(){
+		billfazz.UpdateBillfazzTransactionCronjob()
+	})
 	log.Println("Start cron")
 	c.Start()
 	srv, err := daemon.New(name, description, dependencies...)
