@@ -18,7 +18,7 @@ func getCustomer() Response{
 	log.Printf("start getCustomer")
 	url := apiurl + "/wallet/cronjob/getCustomer"
 	log.Printf(url)
-	timeout := time.Duration(5 * time.Second)
+	timeout := time.Duration(120 * time.Second)
 	client := http.Client{
 		Timeout: timeout,
 	}
@@ -138,7 +138,7 @@ func saveCustomerSaldo() Response{
 func saveSaldoToDB(id, nominal, periode string) Response{
 	log.Printf("start saveSaldoToDB")
 	url := apiurl + "/wallet/cronjob/saveSaldo"
-	timeout := time.Duration(5 * time.Second)
+	timeout := time.Duration(120 * time.Second)
 	client := http.Client{
 		Timeout: timeout,
 	}

@@ -75,7 +75,7 @@ func getBillfazzProduct() BillfazzResponse{
 func delBillfazzProduct() Response{
 	log.Println("start delBillfazzProduct");
 	url := apiUrl + "/wallet/cronjob/billfazz"
-	timeout := time.Duration(5 * time.Second)
+	timeout := time.Duration(120 * time.Second)
 	client := http.Client{
 		Timeout: timeout,
 	}
@@ -104,7 +104,7 @@ func delBillfazzProduct() Response{
 func saveBillfazzProduct(data BillfazzProduct) Response{
 	log.Println("start saveBillfazzProduct");
 	stringUrl := apiUrl + "/wallet/cronjob/billfazz"
-	timeout := time.Duration(5 * time.Second)
+	timeout := time.Duration(120 * time.Second)
 	client := http.Client{
 		Timeout: timeout,
 	}
@@ -152,7 +152,7 @@ func UpdateBillfazzTransactionCronjob() {
 func UpdateBillfazzTransaction() Response{
 	log.Println("start UpdateBillfazzTransaction");
 	stringUrl := apiUrl + "/wallet/cronjob/billfazz"
-	timeout := time.Duration(5 * time.Second)
+	timeout := time.Duration(120 * time.Second)
 	client := http.Client{
 		Timeout: timeout,
 	}

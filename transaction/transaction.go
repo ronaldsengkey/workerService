@@ -28,7 +28,7 @@ func GenerateInOut(){
 
 func postData() Response{
 	url := apiurl + "/transaction/summaryInOutTransaction"
-	timeout := time.Duration(5 * time.Second)
+	timeout := time.Duration(120 * time.Second)
 	client := http.Client{
 		Timeout: timeout,
 	}

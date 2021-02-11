@@ -54,7 +54,7 @@ func GeneratePromotionList(){
 
 func getPromotionData() Response{
 	url := apiurl + "/transaction/cronjob/getPromotion"
-	timeout := time.Duration(5 * time.Second)
+	timeout := time.Duration(120 * time.Second)
 	client := http.Client{
 		Timeout: timeout,
 	}
@@ -112,7 +112,7 @@ func addToNotifService(data Data){
     }
 	log.Println(string(param))
 	url := notifUrl + "/notification/cronjob/saveNotifPromo"
-	timeout := time.Duration(5 * time.Second)
+	timeout := time.Duration(120 * time.Second)
 	client := http.Client{
 		Timeout: timeout,
 	}
