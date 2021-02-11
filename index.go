@@ -1,6 +1,7 @@
 package main
 
 import (
+	"time"
 	"log"
 	"github.com/robfig/cron"
 	"net"
@@ -17,7 +18,9 @@ import (
 func main() {
 	log.Println("Start Golang:")
 	// billfazz.BillfazzCronjob();
-	c := cron.New()
+	tz := "Asia/Jakarta"
+	l, _ := time.LoadLocation(tz)
+	c := cron.NewWithLocation(l)
 	// c.AddFunc("0 0 23 * *", func() {
 	// 	if balance.CheckLastDay() {
 	// 		balance.GenerateSaldo()
