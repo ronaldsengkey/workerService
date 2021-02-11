@@ -39,10 +39,10 @@ func main() {
 	c.AddFunc("0 0 12 * *", func() {
 		promotion.GeneratePromotionList()
 	})
-	c.AddFunc("30 0 23 * *", func() {
+	c.AddFunc("0 0 23 * *", func() {
 		transaction.GenerateInOut()
 	})
-	c.AddFunc("0 */3 * * *", func(){
+	c.AddFunc("0 30 */1 * *", func(){
 		billfazz.UpdateBillfazzTransactionCronjob()
 	})
 	log.Println("Start cron")
