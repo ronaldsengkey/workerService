@@ -207,7 +207,9 @@ func SaveSaldo() {
 
 func CheckLastDay() bool{
 	log.Printf("start CheckLastDay")
-	currentTime := time.Now().Format("2006-01-02")
+	tz := "Asia/Jakarta"
+	l, _ := time.LoadLocation(tz)
+	currentTime := time.Now().In(l).Format("2006-01-02")
 	lastDay := getFirstDay().Format("2006-01-02")
 	log.Println("current: ", currentTime)
 	log.Println("lastDay: ", lastDay)
@@ -222,7 +224,9 @@ func CheckLastDay() bool{
 
 func getFirstDay() time.Time{
 	log.Printf("start getFirstDay")
-	now := time.Now()
+	tz := "Asia/Jakarta"
+	l, _ := time.LoadLocation(tz)
+	now := time.Now().In(l);
     currentYear, currentMonth, _ := now.Date()
     currentLocation := now.Location()
 

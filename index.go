@@ -21,6 +21,7 @@ func main() {
 	tz := "Asia/Jakarta"
 	l, _ := time.LoadLocation(tz)
 	c := cron.NewWithLocation(l)
+	balance.CheckLastDay()
 	// c.AddFunc("0 0 23 * *", func() {
 	// 	if balance.CheckLastDay() {
 	// 		balance.GenerateSaldo()
